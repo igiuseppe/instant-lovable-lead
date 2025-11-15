@@ -197,14 +197,40 @@ const Dashboard = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {lead.qualification_score !== null ? (
-                        <div className="flex items-center">
-                          <div className="text-sm font-medium">{lead.qualification_score}%</div>
-                          <div className="ml-2 w-16 h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${lead.qualification_score >= 70 ? 'bg-success' : lead.qualification_score >= 40 ? 'bg-warning' : 'bg-destructive'}`}
-                              style={{ width: `${lead.qualification_score}%` }}
-                            />
+                        <div className="flex items-center gap-2">
+                          <div className="relative w-12 h-12">
+                            <svg className="w-12 h-12 transform -rotate-90">
+                              <circle
+                                cx="24"
+                                cy="24"
+                                r="20"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                className="text-muted"
+                              />
+                              <circle
+                                cx="24"
+                                cy="24"
+                                r="20"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                                strokeDasharray={`${2 * Math.PI * 20}`}
+                                strokeDashoffset={`${2 * Math.PI * 20 * (1 - lead.qualification_score / 100)}`}
+                                className={
+                                  lead.qualification_score >= 70 ? 'text-green-500' :
+                                  lead.qualification_score >= 40 ? 'text-yellow-500' :
+                                  'text-red-500'
+                                }
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                              {lead.qualification_score}
+                            </span>
                           </div>
+                          <span className="text-sm font-medium">/100</span>
                         </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">—</span>

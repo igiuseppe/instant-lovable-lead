@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Calendar,
   Lightbulb,
+  FileText,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -43,6 +44,7 @@ interface Lead {
   next_actions: string[] | null;
   meeting_scheduled: boolean;
   meeting_datetime: string | null;
+  transcript: string | null;
 }
 
 const LeadDetails = () => {
@@ -303,6 +305,22 @@ const LeadDetails = () => {
           <Card className="shadow-card border-border/50 p-6">
             <h2 className="text-lg font-semibold mb-4">Call Summary</h2>
             <p className="text-foreground leading-relaxed">{lead.call_summary}</p>
+          </Card>
+        )}
+
+        {/* Transcript */}
+        {lead.transcript && (
+          <Card className="shadow-card border-border/50 p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <FileText className="w-5 h-5 text-primary mt-1" />
+              <div>
+                <h2 className="text-xl font-semibold">Call Transcript</h2>
+                <p className="text-sm text-muted-foreground">Full conversation recording</p>
+              </div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-4 max-h-96 overflow-y-auto">
+              <pre className="text-sm whitespace-pre-wrap font-mono">{lead.transcript}</pre>
+            </div>
           </Card>
         )}
 

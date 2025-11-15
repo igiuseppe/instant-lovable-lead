@@ -41,6 +41,7 @@ export type Database = {
           status: string
           surname: string
           tone_signals: string | null
+          transcript: string | null
           updated_at: string
           website: string | null
         }
@@ -70,6 +71,7 @@ export type Database = {
           status?: string
           surname: string
           tone_signals?: string | null
+          transcript?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -99,6 +101,7 @@ export type Database = {
           status?: string
           surname?: string
           tone_signals?: string | null
+          transcript?: string | null
           updated_at?: string
           website?: string | null
         }
