@@ -248,7 +248,7 @@ const Dashboard = () => {
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/trigger?leadId=${lead.id}`);
+                              navigate(`/trigger?leadId=${lead.id}&autoStart=true`);
                             }}
                             className="gap-2"
                           >

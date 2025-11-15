@@ -31,18 +31,11 @@ const TriggerLead = () => {
     const leadId = searchParams.get('leadId');
     const autoStart = searchParams.get('autoStart');
     
-    if (leadId) {
-      setCurrentLeadId(leadId);
-      
-      // Auto-trigger call if autoStart parameter is present
-      if (autoStart === 'true') {
-        toast({
-          title: "Starting Call",
-          description: "Connecting to AI voice agent...",
-        });
-      }
+    if (leadId && autoStart === 'true') {
+      // Automatically trigger the call flow
+      handleStartCall();
     }
-  }, [searchParams, toast]);
+  }, [searchParams]);
 
   const handleStartCall = async () => {
     setIsSubmitting(true);
