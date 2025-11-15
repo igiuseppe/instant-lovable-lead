@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Phone, Clock, CheckCircle2, XCircle, Activity } from "lucide-react";
+import { Phone, Clock, CheckCircle2, XCircle, Activity, PhoneCall } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Lead {
@@ -240,16 +240,32 @@ const Dashboard = () => {
                       {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/lead/${lead.id}`);
-                        }}
-                      >
-                        View Details
-                      </Button>
+                      <div className="flex gap-2">
+                        {lead.status === 'new' && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/trigger?leadId=${lead.id}`);
+                            }}
+                            className="gap-2"
+                          >
+                            <PhoneCall className="w-4 h-4" />
+                            Call
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/lead/${lead.id}`);
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
