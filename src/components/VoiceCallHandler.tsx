@@ -22,9 +22,10 @@ export function VoiceCallHandler({ leadId, agentId, onComplete, autoStart = fals
   // Auto-start call if autoStart prop is true
   useEffect(() => {
     if (autoStart && !isStarted) {
+      console.log('Auto-starting call...');
       startCall();
     }
-  }, [autoStart]);
+  }, [autoStart, isStarted]);
 
   const conversation = useConversation({
     onConnect: async () => {
