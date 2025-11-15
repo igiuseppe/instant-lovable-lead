@@ -1,5 +1,5 @@
 import { useConversation } from '@11labs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
@@ -16,10 +16,16 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
   const [transcript, setTranscript] = useState<string[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [callState, setCallState] = useState<'initializing' | 'connecting' | 'connected' | 'failed'>('initializing');
+  
+  // Use ref to track connection state reliably (avoids closure issues)
+  const hasConnectedRef = useRef(false);
+  const isConnectedRef = useRef(false);
 
   const conversation = useConversation({
     onConnect: async () => {
       console.log('✅ Call connected successfully - Audio stream established');
+      hasConnectedRef.current = true;
+      isConnectedRef.current = true;
       setCallState('connected');
       setIsStarted(true);
       setIsInitializing(false);
@@ -30,19 +36,20 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
       }).eq('id', leadId);
     },
     onDisconnect: async () => {
-      console.log('🔴 Call disconnected - callState:', callState, 'isStarted:', isStarted);
+      console.log('🔴 Call disconnected - hasConnected:', hasConnectedRef.current, 'isConnected:', isConnectedRef.current);
       
       // Only process disconnect if we successfully connected
-      if (callState === 'connected' && isStarted) {
+      if (hasConnectedRef.current && isConnectedRef.current) {
         console.log('✅ Normal call completion');
+        isConnectedRef.current = false;
         await supabase.from('leads').update({
           status: 'call_completed',
           call_ended_at: new Date().toISOString()
         }).eq('id', leadId);
         onComplete();
-      } else if (callState === 'connecting') {
+      } else if (!hasConnectedRef.current) {
         // Call failed during connection
-        console.error('❌ Call failed to connect properly');
+        console.error('❌ Call failed - never successfully connected');
         setCallState('failed');
       }
     },
