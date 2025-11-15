@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Phone, Clock, CheckCircle2, XCircle, Activity } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface Lead {
   id: string;
@@ -58,7 +59,41 @@ const Dashboard = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
+          schema: 'public',
+          table: 'leads'
+        },
+        (payload) => {
+          console.log('New lead detected:', payload);
+          const newLead = payload.new as Lead;
+          
+          // Show toast notification for new inbound call
+          toast(
+            <div className="flex items-center gap-3">
+              <Phone className="w-5 h-5 text-primary" />
+              <div className="flex-1">
+                <p className="font-semibold">New Inbound Call</p>
+                <p className="text-sm text-muted-foreground">
+                  {newLead.name} {newLead.surname}
+                </p>
+              </div>
+            </div>,
+            {
+              action: {
+                label: 'View Details',
+                onClick: () => navigate(`/call/${newLead.id}`)
+              },
+              duration: 10000,
+            }
+          );
+          
+          fetchLeads();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
           schema: 'public',
           table: 'leads'
         },
@@ -106,12 +141,6 @@ const Dashboard = () => {
               Instant lead qualification with AI voice agents
             </p>
           </div>
-          <Button 
-            onClick={() => navigate('/trigger')}
-            className="gradient-primary shadow-elevated"
-          >
-            Simulate Inbound Lead
-          </Button>
         </div>
 
         {/* Stats Cards */}
