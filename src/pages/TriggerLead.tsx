@@ -26,13 +26,23 @@ const TriggerLead = () => {
   // ElevenLabs Agent ID
   const AGENT_ID = "agent_1501ka3t4v8zffm8gznw3tnwyfpt";
 
-  // Check if leadId is provided in URL params
+  // Check if leadId is provided in URL params and auto-start if requested
   useEffect(() => {
     const leadId = searchParams.get('leadId');
+    const autoStart = searchParams.get('autoStart');
+    
     if (leadId) {
       setCurrentLeadId(leadId);
+      
+      // Auto-trigger call if autoStart parameter is present
+      if (autoStart === 'true') {
+        toast({
+          title: "Starting Call",
+          description: "Connecting to AI voice agent...",
+        });
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, toast]);
 
   const handleStartCall = async () => {
     setIsSubmitting(true);
@@ -161,13 +171,14 @@ const TriggerLead = () => {
           </div>
         </Card>
 
-        {currentLeadId && (
-          <VoiceCallHandler 
-            leadId={currentLeadId}
-            agentId={AGENT_ID}
-            onComplete={handleCallComplete}
-          />
-        )}
+            {currentLeadId && (
+              <VoiceCallHandler 
+                leadId={currentLeadId}
+                agentId={AGENT_ID}
+                onComplete={handleCallComplete}
+                autoStart={searchParams.get('autoStart') === 'true'}
+              />
+            )}
 
         <Card className="p-4 bg-accent/10 border-accent/20">
           <div className="text-sm text-accent-foreground">

@@ -54,48 +54,13 @@ serve(async (req) => {
 
     console.log('Lead created successfully:', lead.id);
 
-    // Automatically trigger the qualification call
-    console.log('Starting qualification call for lead:', lead.id);
-    const { data: callData, error: callError } = await supabase.functions.invoke(
-      'start-qualification-call',
-      {
-        body: { leadId: lead.id }
-      }
-    );
-
-    if (callError) {
-      console.error('Error starting qualification call:', callError);
-      // Still return success for lead creation, but note the call failed
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: 'Lead created successfully, but qualification call failed to start',
-          lead: {
-            id: lead.id,
-            name: lead.name,
-            surname: lead.surname,
-            email: lead.email,
-            phone: lead.phone,
-            website: lead.website,
-            status: lead.status,
-            created_at: lead.created_at
-          },
-          call_started: false,
-          call_error: callError.message
-        }),
-        { 
-          status: 201,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log('Qualification call started successfully');
+    // Return URL with autoStart parameter to trigger real voice call
+    const callUrl = `/trigger?leadId=${lead.id}&autoStart=true`;
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Lead created and qualification call started successfully',
+        message: 'Lead created successfully. Use the call_url to start the AI voice call.',
         lead: {
           id: lead.id,
           name: lead.name,
@@ -106,8 +71,7 @@ serve(async (req) => {
           status: lead.status,
           created_at: lead.created_at
         },
-        call_started: true,
-        call_data: callData
+        call_url: callUrl
       }),
       { 
         status: 201,
