@@ -196,7 +196,7 @@ const Dashboard = () => {
                       {getStatusBadge(lead.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {lead.qualification_score !== null ? (
+                      {lead.status !== 'new' && lead.qualification_score !== null ? (
                         <div className="flex items-center gap-2">
                           <div className="relative w-12 h-12">
                             <svg className="w-12 h-12 transform -rotate-90">
