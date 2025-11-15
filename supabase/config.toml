@@ -1,0 +1,4 @@
+project_id = "fbewvehpdwgdchjxrghz"
+
+[functions.start-qualification-call]
+verify_jwt = false

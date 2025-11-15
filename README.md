@@ -1,20 +1,47 @@
-# Welcome to your Lovable project
+# AI Voice Lead Qualification MVP
 
-## Project info
+An AI-native CRM platform that demonstrates instant lead qualification using AI voice agents.
 
-**URL**: https://lovable.dev/projects/c383c17d-6008-4b1c-afc9-8723f90c8c66
+## Overview
 
-## How can I edit this code?
+This MVP showcases how AI voice technology can transform inbound lead qualification:
+- **Instant Response**: AI voice agent automatically calls new leads
+- **Intelligent Qualification**: Follows structured criteria to assess lead quality
+- **Real-time Updates**: CRM dashboard updates live during calls
+- **Actionable Insights**: Generates call summaries, insights, and next actions
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+### 🎯 Lead Trigger
+Simulate inbound leads from your website with a simple form.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c383c17d-6008-4b1c-afc9-8723f90c8c66) and start prompting.
+### 🤖 AI Voice Agent
+Automated qualification calls that:
+- Ask discovery questions
+- Handle objections
+- Evaluate fit based on criteria
+- Attempt to book meetings
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📊 Real-time CRM Dashboard
+- Live status updates
+- Qualification scores
+- Lead pipeline overview
+- Instant notifications
 
-**Use your preferred IDE**
+### 📈 Post-Call Intelligence
+- Call summaries
+- Key insights extraction
+- Objection tracking
+- Recommended next actions
+
+## Technology Stack
+
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **Backend**: Lovable Cloud (Supabase)
+- **AI**: Lovable AI Gateway (Google Gemini)
+- **Real-time**: Supabase Realtime
+
+## Getting Started
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
