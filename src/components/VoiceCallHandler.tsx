@@ -97,6 +97,15 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
     setIsStarted(false);
   };
 
+  // Cleanup: stop call on unmount
+  useEffect(() => {
+    return () => {
+      if (isStarted) {
+        conversation.endSession();
+      }
+    };
+  }, [isStarted, conversation]);
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
