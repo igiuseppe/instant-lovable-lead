@@ -22,8 +22,8 @@ const TriggerLead = () => {
     website: "https://example-store.com",
   });
 
-  // Replace with your ElevenLabs public Agent ID
-  const AGENT_ID = "YOUR_ELEVENLABS_AGENT_ID";
+  // ElevenLabs Agent ID
+  const AGENT_ID = "agent_1501ka3t4v8zffm8gznw3tnwyfpt";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
