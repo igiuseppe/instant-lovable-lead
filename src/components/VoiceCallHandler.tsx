@@ -10,13 +10,21 @@ interface VoiceCallHandlerProps {
   leadId: string;
   agentId: string;
   onComplete: () => void;
+  autoStart?: boolean;
 }
 
-export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandlerProps) {
+export function VoiceCallHandler({ leadId, agentId, onComplete, autoStart = false }: VoiceCallHandlerProps) {
   const [isStarted, setIsStarted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+
+  // Auto-start call if autoStart prop is true
+  useEffect(() => {
+    if (autoStart && !isStarted) {
+      startCall();
+    }
+  }, [autoStart]);
 
   const conversation = useConversation({
     onConnect: async () => {
