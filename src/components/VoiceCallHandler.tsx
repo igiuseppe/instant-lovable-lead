@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface VoiceCallHandlerProps {
   leadId: string;
@@ -14,6 +15,8 @@ interface VoiceCallHandlerProps {
 export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandlerProps) {
   const [isStarted, setIsStarted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const conversation = useConversation({
     onConnect: async () => {
@@ -95,6 +98,37 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
   const endCall = async () => {
     await conversation.endSession();
     setIsStarted(false);
+    
+    // Process the transcript
+    if (transcript.length > 0) {
+      setIsProcessing(true);
+      try {
+        const fullTranscript = transcript.join('\n');
+        const { data, error } = await supabase.functions.invoke('process-transcript', {
+          body: { leadId, transcript: fullTranscript }
+        });
+        
+        if (error) {
+          console.error('Error processing transcript:', error);
+          toast({
+            title: "Processing Error",
+            description: "Failed to process call transcript",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Call Processed",
+            description: "Call transcript has been analyzed successfully",
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+    
+    onComplete();
   };
 
   return (
@@ -122,9 +156,14 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
             Start Call
           </Button>
         ) : (
-          <Button onClick={endCall} variant="destructive" className="gap-2">
+          <Button 
+            onClick={endCall} 
+            variant="destructive" 
+            className="gap-2"
+            disabled={isProcessing}
+          >
             <PhoneOff className="w-4 h-4" />
-            End Call
+            {isProcessing ? 'Processing...' : 'End Call'}
           </Button>
         )}
       </div>
