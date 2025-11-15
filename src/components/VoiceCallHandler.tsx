@@ -17,26 +17,32 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
 
   const conversation = useConversation({
     onConnect: async () => {
-      console.log('Call connected');
+      console.log('Call connected successfully');
       await supabase.from('leads').update({
         status: 'calling',
         call_started_at: new Date().toISOString()
       }).eq('id', leadId);
     },
     onDisconnect: async () => {
-      console.log('Call ended');
-      await supabase.from('leads').update({
-        status: 'call_completed',
-        call_ended_at: new Date().toISOString()
-      }).eq('id', leadId);
-      onComplete();
+      console.log('Call disconnected - status:', conversation.status);
+      
+      // Only mark as completed and close if we were actually connected
+      if (isStarted) {
+        await supabase.from('leads').update({
+          status: 'call_completed',
+          call_ended_at: new Date().toISOString()
+        }).eq('id', leadId);
+        onComplete();
+      }
     },
     onMessage: (message) => {
-      console.log('Message:', message);
+      console.log('Message received:', message);
       setTranscript(prev => [...prev, JSON.stringify(message)]);
     },
     onError: (error) => {
-      console.error('Call error:', error);
+      console.error('Call error details:', error);
+      const errorMessage = String(error);
+      alert(`Call error: ${errorMessage}`);
     },
     // Client tools allow ElevenLabs to update our CRM in real-time
     clientTools: {
@@ -71,24 +77,30 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
 
   const startCall = async () => {
     try {
-      // Request microphone access
+      console.log('Requesting microphone access...');
       await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone access granted');
       
-      // Get signed URL from edge function
+      console.log('Getting signed URL for agent:', agentId);
       const { data, error } = await supabase.functions.invoke('get-agent-url', {
         body: { agentId }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
       
-      // Start conversation with signed URL
+      console.log('Signed URL received, starting session...');
       await conversation.startSession({ 
         signedUrl: data.signedUrl
       });
       
+      console.log('Session started successfully');
       setIsStarted(true);
     } catch (error) {
       console.error('Failed to start call:', error);
+      alert(`Failed to start call: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
