@@ -69,6 +69,7 @@ const Dashboard = () => {
   };
 
   const subscribeToLeads = () => {
+    console.log('Setting up realtime subscription for leads...');
     const channel = supabase
       .channel('leads-changes')
       .on(
@@ -79,9 +80,12 @@ const Dashboard = () => {
           table: 'leads'
         },
         (payload) => {
+          console.log('Realtime event received:', payload);
+          
           // Check for incoming calls
           if (payload.eventType === 'INSERT' && payload.new.status === 'incoming_call') {
             const newLead = payload.new as Lead;
+            console.log('Incoming call detected:', newLead);
             setIncomingCall({
               leadId: newLead.id,
               leadName: `${newLead.name} ${newLead.surname}`
@@ -90,7 +94,9 @@ const Dashboard = () => {
           fetchLeads();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
