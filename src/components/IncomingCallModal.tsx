@@ -29,10 +29,10 @@ export function IncomingCallModal({
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-white">
-                Incoming Call
+                AI Agent Calling
               </h2>
               <p className="text-white/90 text-lg">
-                {leadName}
+                Calling {leadName}
               </p>
             </div>
           </div>
