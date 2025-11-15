@@ -19,7 +19,7 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
 
   const conversation = useConversation({
     onConnect: async () => {
-      console.log('Call connected successfully');
+      console.log('✅ Call connected successfully - Audio stream established');
       setCallState('connected');
       setIsStarted(true);
       setIsInitializing(false);
@@ -30,10 +30,11 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
       }).eq('id', leadId);
     },
     onDisconnect: async () => {
-      console.log('Call disconnected - callState:', callState, 'isStarted:', isStarted);
+      console.log('🔴 Call disconnected - callState:', callState, 'isStarted:', isStarted);
       
       // Only process disconnect if we successfully connected
       if (callState === 'connected' && isStarted) {
+        console.log('✅ Normal call completion');
         await supabase.from('leads').update({
           status: 'call_completed',
           call_ended_at: new Date().toISOString()
@@ -41,16 +42,17 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
         onComplete();
       } else if (callState === 'connecting') {
         // Call failed during connection
-        console.error('Call failed to connect properly');
+        console.error('❌ Call failed to connect properly');
         setCallState('failed');
       }
     },
     onMessage: (message) => {
-      console.log('Message received:', message);
+      console.log('📩 Message received:', message);
+      console.log('🎧 Message from:', message.source);
       setTranscript(prev => [...prev, JSON.stringify(message)]);
     },
     onError: (error) => {
-      console.error('Call error details:', error);
+      console.error('❌ Call error details:', error);
       setCallState('failed');
       const errorMessage = String(error);
       alert(`Call error: ${errorMessage}`);
@@ -90,35 +92,35 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
   const startCall = async () => {
     try {
       setCallState('connecting');
-      console.log('Step 1: Requesting microphone access...');
+      console.log('🔵 Step 1: Initiating call connection...');
       
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('Step 2: Microphone access granted, stream active:', stream.active);
-      
-      console.log('Step 3: Getting signed URL for agent:', agentId);
+      console.log('🔵 Step 2: Getting signed URL for agent:', agentId);
       const { data, error } = await supabase.functions.invoke('get-agent-url', {
         body: { agentId }
       });
 
       if (error) {
-        console.error('Edge function error:', error);
+        console.error('❌ Edge function error:', error);
         throw new Error(`Failed to get agent URL: ${error.message}`);
       }
 
       if (!data?.signedUrl) {
+        console.error('❌ No signed URL received from server');
         throw new Error('No signed URL received from edge function');
       }
       
-      console.log('Step 4: Signed URL received, starting conversation session...');
+      console.log('✅ Step 3: Got signed URL, starting ElevenLabs session...');
+      console.log('🔵 Step 4: ElevenLabs will now request microphone access...');
+      
       await conversation.startSession({ 
         signedUrl: data.signedUrl
       });
       
-      console.log('Step 5: Session start command sent, waiting for connection...');
-      // Note: actual connection happens in onConnect callback
+      console.log('✅ Step 5: Session started - waiting for connection callback...');
+      console.log('🎤 Microphone should now be active and listening...');
       
     } catch (error) {
-      console.error('Failed to start call:', error);
+      console.error('❌ Failed to start call:', error);
       setCallState('failed');
       setIsInitializing(false);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

@@ -11,17 +11,25 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🔵 get-agent-url function invoked');
     const { agentId } = await req.json();
+    console.log('🔵 Agent ID received:', agentId);
 
     if (!agentId) {
+      console.error('❌ No Agent ID provided');
       throw new Error('Agent ID is required');
     }
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
+    const hasApiKey = !!ELEVENLABS_API_KEY;
+    console.log('🔵 ELEVENLABS_API_KEY configured:', hasApiKey);
+    
     if (!ELEVENLABS_API_KEY) {
+      console.error('❌ ELEVENLABS_API_KEY is not configured');
       throw new Error('ELEVENLABS_API_KEY is not configured');
     }
 
+    console.log('🔵 Requesting signed URL from ElevenLabs...');
     // Get signed URL from ElevenLabs API
     const response = await fetch(
       `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${agentId}`,
@@ -33,12 +41,17 @@ serve(async (req) => {
       }
     );
 
+    console.log('🔵 ElevenLabs API response status:', response.status);
+
     if (!response.ok) {
       const error = await response.text();
+      console.error('❌ ElevenLabs API error:', error);
       throw new Error(`Failed to get signed URL: ${error}`);
     }
 
     const data = await response.json();
+    console.log('✅ Signed URL received successfully');
+    console.log('🔵 Signed URL data:', { hasSignedUrl: !!data.signed_url });
 
     return new Response(
       JSON.stringify({ signedUrl: data.signed_url }),
@@ -47,7 +60,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('❌ Error in get-agent-url:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
