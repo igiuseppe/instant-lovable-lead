@@ -54,10 +54,48 @@ serve(async (req) => {
 
     console.log('Lead created successfully:', lead.id);
 
+    // Automatically trigger the qualification call
+    console.log('Starting qualification call for lead:', lead.id);
+    const { data: callData, error: callError } = await supabase.functions.invoke(
+      'start-qualification-call',
+      {
+        body: { leadId: lead.id }
+      }
+    );
+
+    if (callError) {
+      console.error('Error starting qualification call:', callError);
+      // Still return success for lead creation, but note the call failed
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Lead created successfully, but qualification call failed to start',
+          lead: {
+            id: lead.id,
+            name: lead.name,
+            surname: lead.surname,
+            email: lead.email,
+            phone: lead.phone,
+            website: lead.website,
+            status: lead.status,
+            created_at: lead.created_at
+          },
+          call_started: false,
+          call_error: callError.message
+        }),
+        { 
+          status: 201,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log('Qualification call started successfully');
+
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Lead created successfully',
+        message: 'Lead created and qualification call started successfully',
         lead: {
           id: lead.id,
           name: lead.name,
@@ -68,7 +106,8 @@ serve(async (req) => {
           status: lead.status,
           created_at: lead.created_at
         },
-        call_url: `${supabaseUrl.replace('supabase.co', 'lovableproject.com')}/trigger?leadId=${lead.id}`
+        call_started: true,
+        call_data: callData
       }),
       { 
         status: 201,
