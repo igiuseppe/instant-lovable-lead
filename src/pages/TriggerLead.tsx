@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Sparkles } from "lucide-react";
+import { VoiceCallHandler } from "@/components/VoiceCallHandler";
 
 const TriggerLead = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentLeadId, setCurrentLeadId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "John",
     surname: "Doe",
@@ -19,6 +21,9 @@ const TriggerLead = () => {
     phone: "+1234567890",
     website: "https://example-store.com",
   });
+
+  // Replace with your ElevenLabs public Agent ID
+  const AGENT_ID = "YOUR_ELEVENLABS_AGENT_ID";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,27 +46,10 @@ const TriggerLead = () => {
 
       toast({
         title: "Lead Created!",
-        description: "AI voice agent is initiating the call...",
+        description: "Ready to start AI voice call...",
       });
 
-      // Trigger the AI voice call
-      const { error: callError } = await supabase.functions.invoke("start-qualification-call", {
-        body: { leadId: lead.id },
-      });
-
-      if (callError) {
-        console.error("Error starting call:", callError);
-        toast({
-          title: "Call Initiated with Simulation",
-          description: "Voice agent is processing the lead (demo mode)",
-          variant: "default",
-        });
-      }
-
-      // Navigate to dashboard
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      setCurrentLeadId(lead.id);
     } catch (error) {
       console.error("Error creating lead:", error);
       toast({
@@ -72,6 +60,16 @@ const TriggerLead = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCallComplete = () => {
+    toast({
+      title: "Call Completed!",
+      description: "Returning to dashboard...",
+    });
+    setTimeout(() => {
+      navigate("/");
+    }, 1500);
   };
 
   return (
@@ -186,15 +184,23 @@ const TriggerLead = () => {
           </form>
         </Card>
 
+        {currentLeadId && (
+          <VoiceCallHandler 
+            leadId={currentLeadId}
+            agentId={AGENT_ID}
+            onComplete={handleCallComplete}
+          />
+        )}
+
         <Card className="p-4 bg-accent/10 border-accent/20">
           <div className="text-sm text-accent-foreground">
             <p className="font-medium mb-2">What happens next?</p>
             <ol className="list-decimal list-inside space-y-1 text-sm opacity-90">
               <li>Lead is created in the CRM</li>
-              <li>AI voice agent automatically initiates the call</li>
-              <li>Agent conducts qualification interview</li>
-              <li>Call summary and insights are generated</li>
-              <li>CRM updates with qualification results</li>
+              <li>Click "Start Call" to begin voice conversation</li>
+              <li>AI agent conducts qualification interview</li>
+              <li>CRM updates in real-time during call</li>
+              <li>Call summary generated after completion</li>
             </ol>
           </div>
         </Card>
