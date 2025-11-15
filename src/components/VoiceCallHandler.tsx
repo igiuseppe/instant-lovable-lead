@@ -64,9 +64,16 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
       // Request microphone access
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Start conversation with public agent (no signed URL needed)
+      // Get signed URL from edge function
+      const { data, error } = await supabase.functions.invoke('get-agent-url', {
+        body: { agentId }
+      });
+
+      if (error) throw error;
+      
+      // Start conversation with signed URL
       await conversation.startSession({ 
-        agentId: agentId
+        signedUrl: data.signedUrl
       });
       
       setIsStarted(true);
