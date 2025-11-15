@@ -107,7 +107,7 @@ const Dashboard = () => {
             </p>
           </div>
           <Button 
-            onClick={() => navigate('/trigger')}
+            onClick={() => navigate('/trigger?autoStart=true')}
             size="sm"
             className="gradient-primary shadow-elevated"
           >
