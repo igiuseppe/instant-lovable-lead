@@ -1,10 +1,4 @@
 project_id = "fbewvehpdwgdchjxrghz"
 
-[functions.trigger-call]
-verify_jwt = false
-
-[functions.get-agent-url]
-verify_jwt = true
-
 [functions.start-qualification-call]
 verify_jwt = false

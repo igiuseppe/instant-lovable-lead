@@ -9,13 +9,11 @@ interface VoiceCallHandlerProps {
   leadId: string;
   agentId: string;
   onComplete: () => void;
-  autoStart?: boolean;
 }
 
-export function VoiceCallHandler({ leadId, agentId, onComplete, autoStart = false }: VoiceCallHandlerProps) {
+export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandlerProps) {
   const [isStarted, setIsStarted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
-  const [hasAutoStarted, setHasAutoStarted] = useState(false);
 
   const conversation = useConversation({
     onConnect: async () => {
@@ -88,14 +86,6 @@ export function VoiceCallHandler({ leadId, agentId, onComplete, autoStart = fals
     await conversation.endSession();
     setIsStarted(false);
   };
-
-  // Auto-start the call when autoStart prop is true
-  useEffect(() => {
-    if (autoStart && !hasAutoStarted && !isStarted) {
-      setHasAutoStarted(true);
-      startCall();
-    }
-  }, [autoStart, hasAutoStarted, isStarted]);
 
   return (
     <Card className="p-6 space-y-4">

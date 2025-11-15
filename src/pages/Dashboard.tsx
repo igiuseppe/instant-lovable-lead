@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Phone, Clock, CheckCircle2, XCircle, Activity } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { toast } from "sonner";
 
 interface Lead {
   id: string;
@@ -59,71 +58,7 @@ const Dashboard = () => {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'leads'
-        },
-        async (payload) => {
-          console.log('New lead detected:', payload);
-          const newLead = payload.new as Lead;
-          
-          // Request microphone permission immediately
-          try {
-            await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // Show toast notification
-            toast(
-              <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-primary animate-pulse" />
-                <div className="flex-1">
-                  <p className="font-semibold">New Inbound Call</p>
-                  <p className="text-sm text-muted-foreground">
-                    {newLead.name} {newLead.surname}
-                  </p>
-                </div>
-              </div>,
-              {
-                action: {
-                  label: 'Answer',
-                  onClick: () => navigate(`/call/${newLead.id}?autostart=true`)
-                },
-                duration: 15000,
-              }
-            );
-            
-            // Auto-navigate after 2 seconds if user doesn't click
-            setTimeout(() => {
-              navigate(`/call/${newLead.id}?autostart=true`);
-            }, 2000);
-          } catch (error) {
-            console.error('Microphone permission denied:', error);
-            toast(
-              <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-destructive" />
-                <div className="flex-1">
-                  <p className="font-semibold">Microphone Access Required</p>
-                  <p className="text-sm text-muted-foreground">
-                    Please allow microphone access to receive calls
-                  </p>
-                </div>
-              </div>,
-              {
-                action: {
-                  label: 'Retry',
-                  onClick: () => navigate(`/call/${newLead.id}`)
-                },
-                duration: 10000,
-              }
-            );
-          }
-          
-          fetchLeads();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'leads'
         },
@@ -171,6 +106,12 @@ const Dashboard = () => {
               Instant lead qualification with AI voice agents
             </p>
           </div>
+          <Button 
+            onClick={() => navigate('/trigger')}
+            className="gradient-primary shadow-elevated"
+          >
+            Simulate Inbound Lead
+          </Button>
         </div>
 
         {/* Stats Cards */}
