@@ -63,29 +63,59 @@ const Dashboard = () => {
           schema: 'public',
           table: 'leads'
         },
-        (payload) => {
+        async (payload) => {
           console.log('New lead detected:', payload);
           const newLead = payload.new as Lead;
           
-          // Show toast notification for new inbound call
-          toast(
-            <div className="flex items-center gap-3">
-              <Phone className="w-5 h-5 text-primary" />
-              <div className="flex-1">
-                <p className="font-semibold">New Inbound Call</p>
-                <p className="text-sm text-muted-foreground">
-                  {newLead.name} {newLead.surname}
-                </p>
-              </div>
-            </div>,
-            {
-              action: {
-                label: 'View Details',
-                onClick: () => navigate(`/call/${newLead.id}`)
-              },
-              duration: 10000,
-            }
-          );
+          // Request microphone permission immediately
+          try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Show toast notification
+            toast(
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-primary animate-pulse" />
+                <div className="flex-1">
+                  <p className="font-semibold">New Inbound Call</p>
+                  <p className="text-sm text-muted-foreground">
+                    {newLead.name} {newLead.surname}
+                  </p>
+                </div>
+              </div>,
+              {
+                action: {
+                  label: 'Answer',
+                  onClick: () => navigate(`/call/${newLead.id}?autostart=true`)
+                },
+                duration: 15000,
+              }
+            );
+            
+            // Auto-navigate after 2 seconds if user doesn't click
+            setTimeout(() => {
+              navigate(`/call/${newLead.id}?autostart=true`);
+            }, 2000);
+          } catch (error) {
+            console.error('Microphone permission denied:', error);
+            toast(
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-destructive" />
+                <div className="flex-1">
+                  <p className="font-semibold">Microphone Access Required</p>
+                  <p className="text-sm text-muted-foreground">
+                    Please allow microphone access to receive calls
+                  </p>
+                </div>
+              </div>,
+              {
+                action: {
+                  label: 'Retry',
+                  onClick: () => navigate(`/call/${newLead.id}`)
+                },
+                duration: 10000,
+              }
+            );
+          }
           
           fetchLeads();
         }
