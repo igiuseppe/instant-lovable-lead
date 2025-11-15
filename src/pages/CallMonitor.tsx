@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,10 +9,12 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 
 const CallMonitor = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [lead, setLead] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [shouldAutoStart, setShouldAutoStart] = useState(false);
   
   const AGENT_ID = "agent_1501ka3t4v8zffm8gznw3tnwyfpt";
 
@@ -20,8 +22,13 @@ const CallMonitor = () => {
     if (id) {
       fetchLead();
       subscribeToLead();
+      
+      // Check if we should auto-start the call
+      if (searchParams.get('autostart') === 'true') {
+        setShouldAutoStart(true);
+      }
     }
-  }, [id]);
+  }, [id, searchParams]);
 
   const fetchLead = async () => {
     const { data, error } = await supabase
@@ -115,6 +122,7 @@ const CallMonitor = () => {
           leadId={lead.id} 
           agentId={AGENT_ID}
           onComplete={handleCallComplete}
+          autoStart={shouldAutoStart}
         />
 
         {/* Lead Information */}
