@@ -55,6 +55,16 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
           meeting_datetime: params.datetime
         }).eq('id', leadId);
         return "Demo scheduled successfully";
+      },
+      saveCallSummary: async (params: { summary: string; insights?: string[]; objections?: string[]; next_actions?: string[] }) => {
+        console.log('Saving call summary:', params);
+        await supabase.from('leads').update({
+          call_summary: params.summary,
+          key_insights: params.insights,
+          objections: params.objections,
+          next_actions: params.next_actions
+        }).eq('id', leadId);
+        return "Summary saved successfully";
       }
     }
   });
