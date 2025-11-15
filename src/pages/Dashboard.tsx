@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Phone, Clock, CheckCircle2, XCircle, Activity } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { IncomingCallModal } from "@/components/IncomingCallModal";
+
 
 interface Lead {
   id: string;
@@ -25,7 +27,11 @@ interface Lead {
 const Dashboard = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState({ total: 0, qualified: 0, calling: 0 });
+  const [incomingCall, setIncomingCall] = useState<{ leadId: string; leadName: string } | null>(null);
   const navigate = useNavigate();
+
+  // Default agent ID - replace with your actual ElevenLabs agent ID
+  const AGENT_ID = "your-agent-id-here";
 
   useEffect(() => {
     fetchLeads();
@@ -72,7 +78,15 @@ const Dashboard = () => {
           schema: 'public',
           table: 'leads'
         },
-        () => {
+        (payload) => {
+          // Check for incoming calls
+          if (payload.eventType === 'INSERT' && payload.new.status === 'incoming_call') {
+            const newLead = payload.new as Lead;
+            setIncomingCall({
+              leadId: newLead.id,
+              leadName: `${newLead.name} ${newLead.surname}`
+            });
+          }
           fetchLeads();
         }
       )
@@ -86,6 +100,7 @@ const Dashboard = () => {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", icon: any, class: string }> = {
       new: { variant: "secondary", icon: Activity, class: "bg-muted" },
+      incoming_call: { variant: "default", icon: Phone, class: "bg-warning animate-pulse-soft" },
       calling: { variant: "default", icon: Phone, class: "bg-warning animate-pulse-soft" },
       call_completed: { variant: "outline", icon: Clock, class: "bg-accent/10" },
       qualified: { variant: "default", icon: CheckCircle2, class: "bg-success" },
@@ -118,9 +133,11 @@ const Dashboard = () => {
           </div>
           <Button 
             onClick={() => navigate('/trigger')}
+            size="icon"
             className="gradient-primary shadow-elevated"
+            title="Manual Call Trigger (Backup)"
           >
-            Simulate Inbound Lead
+            <Phone className="w-5 h-5" />
           </Button>
         </div>
 
@@ -247,6 +264,17 @@ const Dashboard = () => {
             )}
           </div>
         </Card>
+
+        {/* Incoming Call Modal */}
+        {incomingCall && (
+          <IncomingCallModal
+            isOpen={true}
+            leadId={incomingCall.leadId}
+            leadName={incomingCall.leadName}
+            agentId={AGENT_ID}
+            onClose={() => setIncomingCall(null)}
+          />
+        )}
       </div>
     </div>
   );
