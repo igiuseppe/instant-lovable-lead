@@ -31,9 +31,15 @@ const TriggerLead = () => {
     const leadId = searchParams.get('leadId');
     const autoStart = searchParams.get('autoStart');
     
-    if (leadId && autoStart === 'true') {
+    console.log('TriggerLead mounted with:', { leadId, autoStart });
+    
+    if (autoStart === 'true') {
       // Automatically trigger the call flow
+      console.log('Auto-starting call flow...');
       handleStartCall();
+    } else if (leadId) {
+      // Just set the lead ID without auto-starting
+      setCurrentLeadId(leadId);
     }
   }, [searchParams]);
 
