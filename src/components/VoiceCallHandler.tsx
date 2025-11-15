@@ -14,6 +14,7 @@ interface VoiceCallHandlerProps {
 export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandlerProps) {
   const [isStarted, setIsStarted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const conversation = useConversation({
     onConnect: async () => {
@@ -98,11 +99,19 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
       
       console.log('Session started successfully');
       setIsStarted(true);
+      setIsInitializing(false);
     } catch (error) {
       console.error('Failed to start call:', error);
       alert(`Failed to start call: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsInitializing(false);
+      onComplete(); // Close modal on error
     }
   };
+
+  // Auto-start call when component mounts
+  useEffect(() => {
+    startCall();
+  }, []);
 
   const endCall = async () => {
     await conversation.endSession();
@@ -122,9 +131,9 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">AI Voice Call</h3>
+          <h3 className="text-lg font-semibold">AI Agent Call</h3>
           <p className="text-sm text-muted-foreground">
-            {conversation.status === 'connected' ? 'Call in progress...' : 'Ready to start call'}
+            {isInitializing ? 'Connecting...' : conversation.status === 'connected' ? 'Call in progress...' : 'Connecting to agent...'}
           </p>
         </div>
         
@@ -137,17 +146,15 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
       </div>
 
       <div className="flex gap-3">
-        {!isStarted ? (
-          <Button onClick={startCall} className="gap-2">
-            <Phone className="w-4 h-4" />
-            Start Call
-          </Button>
-        ) : (
-          <Button onClick={endCall} variant="destructive" className="gap-2">
-            <PhoneOff className="w-4 h-4" />
-            End Call
-          </Button>
-        )}
+        <Button 
+          onClick={endCall} 
+          variant="destructive" 
+          className="gap-2"
+          disabled={isInitializing}
+        >
+          <PhoneOff className="w-4 h-4" />
+          {isInitializing ? 'Connecting...' : 'Hang Up'}
+        </Button>
       </div>
 
       {conversation.status === 'connected' && (
