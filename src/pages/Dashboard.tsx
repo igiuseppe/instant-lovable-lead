@@ -47,7 +47,7 @@ const Dashboard = () => {
   const calculateStats = (data: Lead[]) => {
     setStats({
       total: data.length,
-      qualified: data.filter(l => l.status === 'qualified').length,
+      qualified: data.filter(l => l.qualification_score !== null && l.qualification_score >= 70).length,
       calling: data.filter(l => l.status === 'calling').length,
     });
   };
