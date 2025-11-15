@@ -17,11 +17,19 @@ serve(async (req) => {
       throw new Error('Agent ID is required');
     }
 
-    // For public agents, we can get the signed URL without authentication
+    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
+    if (!ELEVENLABS_API_KEY) {
+      throw new Error('ELEVENLABS_API_KEY is not configured');
+    }
+
+    // Get signed URL from ElevenLabs API
     const response = await fetch(
       `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${agentId}`,
       {
         method: 'GET',
+        headers: {
+          'xi-api-key': ELEVENLABS_API_KEY,
+        },
       }
     );
 
