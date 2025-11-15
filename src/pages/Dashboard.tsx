@@ -8,7 +8,6 @@ import { Phone, Clock, CheckCircle2, XCircle, Activity } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { IncomingCallModal } from "@/components/IncomingCallModal";
 
-
 interface Lead {
   id: string;
   name: string;
@@ -31,7 +30,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   // Default agent ID - replace with your actual ElevenLabs agent ID
-  const AGENT_ID = "your-agent-id-here";
+  const AGENT_ID = "agent_1501ka3t4v8zffm8gznw3tnwyfpt";
 
   useEffect(() => {
     fetchLeads();
@@ -40,9 +39,7 @@ const Dashboard = () => {
 
   const fetchLeads = async () => {
     // Get all leads for stats calculation
-    const { data: allLeads, error: statsError } = await supabase
-      .from("leads")
-      .select("*");
+    const { data: allLeads, error: statsError } = await supabase.from("leads").select("*");
 
     if (!statsError && allLeads) {
       calculateStats(allLeads);
@@ -63,39 +60,39 @@ const Dashboard = () => {
   const calculateStats = (data: Lead[]) => {
     setStats({
       total: data.length,
-      qualified: data.filter(l => l.qualification_result === 'qualified').length,
-      calling: data.filter(l => l.status === 'calling').length,
+      qualified: data.filter((l) => l.qualification_result === "qualified").length,
+      calling: data.filter((l) => l.status === "calling").length,
     });
   };
 
   const subscribeToLeads = () => {
-    console.log('Setting up realtime subscription for leads...');
+    console.log("Setting up realtime subscription for leads...");
     const channel = supabase
-      .channel('leads-changes')
+      .channel("leads-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'leads'
+          event: "*",
+          schema: "public",
+          table: "leads",
         },
         (payload) => {
-          console.log('Realtime event received:', payload);
-          
+          console.log("Realtime event received:", payload);
+
           // Check for incoming calls
-          if (payload.eventType === 'INSERT' && payload.new.status === 'incoming_call') {
+          if (payload.eventType === "INSERT" && payload.new.status === "incoming_call") {
             const newLead = payload.new as Lead;
-            console.log('Incoming call detected:', newLead);
+            console.log("Incoming call detected:", newLead);
             setIncomingCall({
               leadId: newLead.id,
-              leadName: `${newLead.name} ${newLead.surname}`
+              leadName: `${newLead.name} ${newLead.surname}`,
             });
           }
           fetchLeads();
-        }
+        },
       )
       .subscribe((status) => {
-        console.log('Subscription status:', status);
+        console.log("Subscription status:", status);
       });
 
     return () => {
@@ -104,7 +101,10 @@ const Dashboard = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", icon: any, class: string }> = {
+    const styles: Record<
+      string,
+      { variant: "default" | "secondary" | "destructive" | "outline"; icon: any; class: string }
+    > = {
       new: { variant: "secondary", icon: Activity, class: "bg-muted" },
       incoming_call: { variant: "default", icon: Phone, class: "bg-warning animate-pulse-soft" },
       calling: { variant: "default", icon: Phone, class: "bg-warning animate-pulse-soft" },
@@ -119,7 +119,7 @@ const Dashboard = () => {
     return (
       <Badge variant={config.variant} className={config.class}>
         <Icon className="w-3 h-3 mr-1" />
-        {status.replace('_', ' ')}
+        {status.replace("_", " ")}
       </Badge>
     );
   };
@@ -133,12 +133,10 @@ const Dashboard = () => {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               AI Voice CRM
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Instant lead qualification with AI voice agents
-            </p>
+            <p className="text-muted-foreground mt-1">Instant lead qualification with AI voice agents</p>
           </div>
-          <Button 
-            onClick={() => navigate('/trigger')}
+          <Button
+            onClick={() => navigate("/trigger")}
             size="icon"
             className="gradient-primary shadow-elevated"
             title="Manual Call Trigger (Backup)"
@@ -214,27 +212,27 @@ const Dashboard = () => {
               </thead>
               <tbody className="divide-y divide-border">
                 {leads.map((lead) => (
-                  <tr 
-                    key={lead.id} 
+                  <tr
+                    key={lead.id}
                     className="hover:bg-muted/30 transition-colors cursor-pointer"
                     onClick={() => navigate(`/lead/${lead.id}`)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <div className="font-medium">{lead.name} {lead.surname}</div>
+                        <div className="font-medium">
+                          {lead.name} {lead.surname}
+                        </div>
                         <div className="text-sm text-muted-foreground">{lead.email}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(lead.status)}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(lead.status)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {lead.qualification_score !== null ? (
                         <div className="flex items-center">
                           <div className="text-sm font-medium">{lead.qualification_score}%</div>
                           <div className="ml-2 w-16 h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full ${lead.qualification_score >= 70 ? 'bg-success' : lead.qualification_score >= 40 ? 'bg-warning' : 'bg-destructive'}`}
+                            <div
+                              className={`h-full ${lead.qualification_score >= 70 ? "bg-success" : lead.qualification_score >= 40 ? "bg-warning" : "bg-destructive"}`}
                               style={{ width: `${lead.qualification_score}%` }}
                             />
                           </div>
@@ -247,8 +245,8 @@ const Dashboard = () => {
                       {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
