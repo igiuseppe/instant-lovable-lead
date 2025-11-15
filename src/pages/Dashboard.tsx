@@ -100,7 +100,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              AI Voice CRM
+              QualifAI
             </h1>
             <p className="text-muted-foreground mt-1">
               Instant lead qualification with AI voice agents
