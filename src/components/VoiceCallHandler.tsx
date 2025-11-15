@@ -28,10 +28,28 @@ export function VoiceCallHandler({ leadId, agentId, onComplete }: VoiceCallHandl
     },
     onDisconnect: async () => {
       console.log('Call ended');
+      const endTime = new Date().toISOString();
+      
+      // Fetch the lead to get call_started_at
+      const { data: lead } = await supabase
+        .from('leads')
+        .select('call_started_at')
+        .eq('id', leadId)
+        .single();
+      
+      let duration = 0;
+      if (lead?.call_started_at) {
+        const startTime = new Date(lead.call_started_at);
+        const endTimeDate = new Date(endTime);
+        duration = Math.floor((endTimeDate.getTime() - startTime.getTime()) / 1000);
+      }
+      
       await supabase.from('leads').update({
         status: 'call_completed',
-        call_ended_at: new Date().toISOString()
+        call_ended_at: endTime,
+        call_duration_seconds: duration
       }).eq('id', leadId);
+      
       onComplete();
     },
     onMessage: (message) => {
