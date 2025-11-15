@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { VoiceCallHandler } from "@/components/VoiceCallHandler";
 const TriggerLead = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentLeadId, setCurrentLeadId] = useState<string | null>(null);
   const leadData = {
@@ -25,29 +26,50 @@ const TriggerLead = () => {
   // ElevenLabs Agent ID
   const AGENT_ID = "agent_1501ka3t4v8zffm8gznw3tnwyfpt";
 
+  // Check if leadId is provided in URL params
+  useEffect(() => {
+    const leadId = searchParams.get('leadId');
+    if (leadId) {
+      setCurrentLeadId(leadId);
+    }
+  }, [searchParams]);
+
   const handleStartCall = async () => {
     setIsSubmitting(true);
 
     try {
-      const { data: lead, error } = await supabase
-        .from("leads")
-        .insert([
-          {
-            ...leadData,
-            status: "new",
-          },
-        ])
-        .select()
-        .single();
+      // Check if we have an existing lead ID
+      const existingLeadId = searchParams.get('leadId');
+      
+      if (existingLeadId) {
+        // Use existing lead
+        setCurrentLeadId(existingLeadId);
+        toast({
+          title: "Starting Call",
+          description: "Connecting to AI voice agent...",
+        });
+      } else {
+        // Create new lead
+        const { data: lead, error } = await supabase
+          .from("leads")
+          .insert([
+            {
+              ...leadData,
+              status: "new",
+            },
+          ])
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Lead Created!",
-        description: "Starting AI voice call...",
-      });
+        toast({
+          title: "Lead Created!",
+          description: "Starting AI voice call...",
+        });
 
-      setCurrentLeadId(lead.id);
+        setCurrentLeadId(lead.id);
+      }
     } catch (error) {
       console.error("Error creating lead:", error);
       toast({
