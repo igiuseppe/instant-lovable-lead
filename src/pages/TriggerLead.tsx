@@ -14,28 +14,26 @@ const TriggerLead = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentLeadId, setCurrentLeadId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: "John",
-    surname: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1234567890",
-    website: "https://example-store.com",
-  });
+  const leadData = {
+    name: "Lorenzo",
+    surname: "Rossi",
+    email: "lorenzo@example.com",
+    phone: "+39123456789",
+    website: "https://example.com",
+  };
 
   // ElevenLabs Agent ID
   const AGENT_ID = "agent_1501ka3t4v8zffm8gznw3tnwyfpt";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStartCall = async () => {
     setIsSubmitting(true);
 
     try {
-      // Create the lead in the database
       const { data: lead, error } = await supabase
         .from("leads")
         .insert([
           {
-            ...formData,
+            ...leadData,
             status: "new",
           },
         ])
@@ -46,7 +44,7 @@ const TriggerLead = () => {
 
       toast({
         title: "Lead Created!",
-        description: "Ready to start AI voice call...",
+        description: "Starting AI voice call...",
       });
 
       setCurrentLeadId(lead.id);
@@ -99,75 +97,32 @@ const TriggerLead = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">First Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
+          <div className="p-6 space-y-6">
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-medium">{leadData.name} {leadData.surname}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Email</p>
+                  <p className="font-medium">{leadData.email}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Phone</p>
+                  <p className="font-medium">{leadData.phone}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Website</p>
+                  <p className="font-medium">{leadData.website}</p>
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="surname">Last Name</Label>
-                <Input
-                  id="surname"
-                  value={formData.surname}
-                  onChange={(e) =>
-                    setFormData({ ...formData, surname: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="website">Website (Optional)</Label>
-              <Input
-                id="website"
-                type="url"
-                value={formData.website}
-                onChange={(e) =>
-                  setFormData({ ...formData, website: e.target.value })
-                }
-              />
             </div>
 
             <Button
-              type="submit"
+              onClick={handleStartCall}
               className="w-full gradient-primary shadow-elevated"
-              disabled={isSubmitting}
+              disabled={isSubmitting || currentLeadId !== null}
             >
               {isSubmitting ? (
                 <>
@@ -177,11 +132,11 @@ const TriggerLead = () => {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Trigger AI Call
+                  {currentLeadId ? "Call in Progress..." : "Trigger AI Call"}
                 </>
               )}
             </Button>
-          </form>
+          </div>
         </Card>
 
         {currentLeadId && (
