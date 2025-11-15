@@ -54,8 +54,9 @@ serve(async (req) => {
 
     console.log('Lead created successfully:', lead.id);
 
-    // Return URL with autoStart parameter to trigger real voice call
-    const callUrl = `/trigger?leadId=${lead.id}&autoStart=true`;
+    // Get the origin from the request to build the full URL
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://your-app-url.com';
+    const callUrl = `${origin}/trigger?leadId=${lead.id}&autoStart=true`;
 
     return new Response(
       JSON.stringify({
