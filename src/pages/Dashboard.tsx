@@ -108,9 +108,10 @@ const Dashboard = () => {
           </div>
           <Button 
             onClick={() => navigate('/trigger')}
+            size="sm"
             className="gradient-primary shadow-elevated"
           >
-            Simulate Inbound Lead
+            <PhoneCall className="w-4 h-4" />
           </Button>
         </div>
 
