@@ -114,7 +114,8 @@ Return ONLY a valid JSON object with this exact structure:
       next_actions: [result.demo_personalization],
     };
 
-    if (result.meeting_datetime) {
+    // Handle meeting datetime - check if it's not null or the string "null"
+    if (result.meeting_datetime && result.meeting_datetime !== "null") {
       updateData.meeting_scheduled = true;
       updateData.meeting_datetime = result.meeting_datetime;
     }
