@@ -33,21 +33,31 @@ const Dashboard = () => {
   }, []);
 
   const fetchLeads = async () => {
+    // Get all leads for stats calculation
+    const { data: allLeads, error: statsError } = await supabase
+      .from("leads")
+      .select("*");
+
+    if (!statsError && allLeads) {
+      calculateStats(allLeads);
+    }
+
+    // Get only last 20 leads for display
     const { data, error } = await supabase
       .from("leads")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(20);
 
     if (!error && data) {
       setLeads(data);
-      calculateStats(data);
     }
   };
 
   const calculateStats = (data: Lead[]) => {
     setStats({
       total: data.length,
-      qualified: data.filter(l => l.status === 'qualified').length,
+      qualified: data.filter(l => l.qualification_result === 'qualified').length,
       calling: data.filter(l => l.status === 'calling').length,
     });
   };
